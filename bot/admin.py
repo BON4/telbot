@@ -15,7 +15,7 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'profile', 'text', 'date_of_creation')
+    list_display = ('id', 'profile', 'store', 'text', 'date_of_creation')
 
     def get_queryset(self, request):
         qs = super(MessageAdmin, self).get_queryset(request)

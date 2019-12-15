@@ -17,6 +17,8 @@ class Profile(models.Model):
 class Message(models.Model):
     profile = models.ForeignKey(to='bot.Profile', verbose_name='Профиль', on_delete=models.CASCADE)
 
+    store = models.ForeignKey(to='bot.Store', verbose_name='Выбранный магазин', on_delete=models.CASCADE)
+
     text = models.TextField(verbose_name='Текст', max_length=500)
 
     date_of_creation = models.DateTimeField(verbose_name='Время получения', auto_now_add=True)

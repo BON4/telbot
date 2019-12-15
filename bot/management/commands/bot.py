@@ -1,14 +1,15 @@
 from django.core.management.base import BaseCommand
-from bot.models import Profile, Message
+from bot.models import Profile, Message, Store
 from telegram import Bot
 from telegram import Update
 from telegram.ext import CallbackContext
 from telegram.ext import Filters
 from telegram.ext import MessageHandler, CommandHandler
-from telegram.ext import Updater
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from telegram.utils.request import Request
 from django.conf import settings
 from functools import wraps
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 # Decorator for error loggs
@@ -53,17 +54,48 @@ def prof_check(f):
     return inner
 
 
+@log_errors
+def button(update: Update, context: CallbackContext):
+    query = update.callback_query
+    chat_id = update.callback_query.message.chat_id
+    name = update.callback_query.message.chat.username
+
+    profile, _ = Profile.objects.get_or_create(
+        telegram_id=chat_id,
+        defaults={
+            'name': name,
+        }
+    )
+
+    store = Store.objects.get(
+        id=int(query.data),
+    )
+
+    m = Message(
+        profile=profile,
+        text='Зарезервировано',
+        store=store,
+    )
+    m.save()
+
+    query.edit_message_text(text="Selected option: {}".format(query.data))
+
+
 @prof_check
 @log_errors
 def chose_place(update: Update, context: CallbackContext):
-    chat_id = update.message.chat_id
+    keyboard = []
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    #chat_id = update.message.chat_id
     reply_text = ''
-    for item in Profile.objects.get_queryset():
-        if item.telegram_id == chat_id:
-            reply_text += f'{str(item)} - it is you\n'
-        else:
-            reply_text += f'{str(item)}'
-    update.message.reply_text(text=reply_text)
+    count_var = 1
+    for item in Store.objects.get_queryset():
+        reply_text += f'{count_var}. {str(item)}\n\n'
+        keyboard.append([InlineKeyboardButton(f"{count_var}", callback_data=item.id)])
+        count_var = count_var + 1
+
+    update.message.reply_text(reply_text, reply_markup=reply_markup)
+    #update.message.reply_text(text=reply_text)
 
 
 @prof_check
@@ -108,11 +140,12 @@ class Command(BaseCommand):
             bot=bot,
             use_context=True,
         )
-        message_handler = MessageHandler(Filters.text, do_echo)
-        updater.dispatcher.add_handler(message_handler)
+        # message_handler = MessageHandler(Filters.text, do_echo)
+        # updater.dispatcher.add_handler(message_handler)
 
-        order_handler = CommandHandler('places', chose_place)
-        updater.dispatcher.add_handler(order_handler)
+        updater.dispatcher.add_handler(CommandHandler('place', chose_place))
+        updater.dispatcher.add_handler(CallbackQueryHandler(button))
+
         print(bot.get_me())
 
         # Continuous polling
