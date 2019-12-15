@@ -1,11 +1,16 @@
 from django.contrib import admin
-from .models import Profile, Message
+from .models import Profile, Message, Store
 #from .forms import StoreForm
 
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('id', 'telegram_id', 'name')
+
+
+@admin.register(Store)
+class StoreAdmin(admin.ModelAdmin):
+    list_display = ('id', 'store_name', 'street_name', 'latitude', 'longitude')
 
 
 @admin.register(Message)
@@ -17,4 +22,3 @@ class MessageAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(author=request.user)
-# Register your models here.

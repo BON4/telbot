@@ -1,5 +1,4 @@
 from django.db import models
-#from django.contrib.gis.db import models as gis_models
 
 
 class Profile(models.Model):
@@ -28,3 +27,20 @@ class Message(models.Model):
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = "Сообщения"
+
+
+class Store(models.Model):
+    longitude = models.DecimalField(max_digits=22, decimal_places=16, blank=True, null=False)
+    latitude = models.DecimalField(max_digits=22, decimal_places=16, blank=True, null=False)
+
+    store_name = models.CharField(verbose_name='Название магазина', max_length=200)
+
+    street_name = models.CharField(verbose_name='Название улицы', max_length=200)
+
+    def __str__(self):
+        return f'{self.store_name} по адресу {self.street_name}'
+
+    class Meta:
+        verbose_name = 'Магазин'
+        verbose_name_plural = "Магазины"
+
