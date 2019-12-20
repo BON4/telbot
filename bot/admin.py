@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Message, Store
+from .models import Profile, Message, Store, Product
 #from .forms import StoreForm
 
 
@@ -8,9 +8,18 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('id', 'telegram_id', 'name')
 
 
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'price', 'product_code')
+
+
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ('id', 'store_name', 'street_name', 'latitude', 'longitude')
+    fields = ['store_name', 'street_name', 'latitude', 'longitude', 'product']
+    list_display = ('id', 'store_name', 'street_name', 'latitude', 'get_products', 'longitude')
+
+    def get_products(self, obj):
+        return "\n".join([str(p.product_code) for p in obj.product.all()])
 
 
 @admin.register(Message)

@@ -39,6 +39,8 @@ class Store(models.Model):
 
     street_name = models.CharField(verbose_name='Название улицы', max_length=200)
 
+    product = models.ManyToManyField(to='bot.Product', verbose_name='Товары в наличии')
+
     def __str__(self):
         return f'{self.store_name} по адресу {self.street_name}'
 
@@ -46,3 +48,15 @@ class Store(models.Model):
         verbose_name = 'Магазин'
         verbose_name_plural = "Магазины"
 
+
+class Product(models.Model):
+    product_code = models.PositiveIntegerField(verbose_name='Код товара', unique=True)
+    name = models.CharField(max_length=100, verbose_name='Наименование товара')
+    price = models.FloatField(verbose_name='Цена товара')
+
+    def __str__(self):
+        return f'{self.name}___{self.product_code}'
+
+    class Meta:
+        verbose_name = 'Продукт'
+        verbose_name_plural = "Продукты"
